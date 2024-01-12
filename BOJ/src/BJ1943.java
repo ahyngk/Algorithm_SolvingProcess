@@ -12,32 +12,31 @@ public class BJ1943 {
     static boolean isPossible = false;
 
     public static void main(String[] args) throws IOException {
-        run();
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        for (int i = 0; i < 3; i++) {
+            run(br);
+        }
         System.out.println(answer);
     }
-    static void run() throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    static void run(BufferedReader br) throws IOException {
         StringTokenizer st;
+        List<Money> totalMoney = new ArrayList<>();
+        isPossible = false;
+        totalPrice = 0;
 
-        for (int runtime = 0; runtime < 3; runtime++) {
-            List<Money> totalMoney = new ArrayList<>();
-            isPossible = false;
-            totalPrice = 0;
-
-            int kind = Integer.parseInt(br.readLine());
-            for (int i = 0; i < kind; i++) {
-                st = new StringTokenizer(br.readLine());
-                totalMoney.add(new Money(Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken())));
-                totalPrice += totalMoney.get(totalMoney.size()-1).price;
-            }
-            Collections.sort(totalMoney);
-            select(0,0,totalMoney);
-            if(isPossible){
-                answer.append(1).append("\n");
-            }
-            else {
-                answer.append(0).append("\n");
-            }
+        int kind = Integer.parseInt(br.readLine());
+        for (int i = 0; i < kind; i++) {
+            st = new StringTokenizer(br.readLine());
+            totalMoney.add(new Money(Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken())));
+            totalPrice += totalMoney.get(totalMoney.size()-1).price*totalMoney.get(totalMoney.size()-1).count;
+        }
+        Collections.sort(totalMoney);
+        select(0,0,totalMoney);
+        if(isPossible){
+            answer.append(1).append("\n");
+        }
+        else {
+            answer.append(0).append("\n");
         }
     }
     static void select(int index, int currentTotal, List<Money> totalMoney){
