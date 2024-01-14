@@ -30,6 +30,10 @@ public class BJ1943 {
                 totalMoney.add(new Money(Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken())));
                 totalPrice += totalMoney.get(totalMoney.size()-1).price;
             }
+            if(totalPrice%2 != 0){
+                return;
+            }
+
             Collections.sort(totalMoney);
             select(0,0,totalMoney);
             if(isPossible){
