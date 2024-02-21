@@ -5,18 +5,17 @@ import java.util.*;
 
 public class BJ14725 {
     static Node entrance;
-    static Node last;
     static StringBuilder sb = new StringBuilder();
+    static Map<String,List<Node>> nodeMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
         entrance = new Node();
         entrance.child = new ArrayList<>();
-        entrance.info = "THISISTHEFIRSTNODE";
-        last = entrance;
+        entrance.info = "FIRSTNODE";
         read();
         Collections.sort(entrance.child);
         for (int i = 0; i < entrance.child.size(); i++) {
-            mapDepth(0,entrance.child.get(i));
+            mapDepth(entrance.child.get(i));
         }
         System.out.print(sb);
     }
@@ -29,90 +28,106 @@ public class BJ14725 {
         }
     }
     static void makeNodeList(String[] currentLine){
-//        System.out.println("currentLine = " + Arrays.toString(currentLine));
-        Node currentFirst = findHead(entrance, currentLine[0]);
-        if(currentFirst == null){
-            currentFirst = new Node();
-            currentFirst.info = currentLine[0];
-            currentFirst.child = new ArrayList<>();
-            currentFirst.parent = entrance;
-            entrance.child.add(currentFirst);
+        List<Node> firstCandidate = findFirst(currentLine[0]);
+        Node last = new Node();
+        last.depth = -1;
+        if(firstCandidate.isEmpty()){
+            Node first = new Node();
+            first.info = currentLine[0];
+            first.child = new ArrayList<>();
+            first.parent = entrance;
+            first.depth = 0;
+            entrance.child.add(first);
+            nodeMap.put(first.info, new ArrayList<>());
+            nodeMap.get(first.info).add(first);
+            last = first;
         }
-//        System.out.println("currentFirst = " + currentFirst.info);
-        Found found = findLast(0, currentFirst, currentLine);
-        Node currentLast = found.node;
-        if(!found.node.parent.equals(entrance)){
-            currentLast = found.node.parent;
+        else {
+            for (int i = 0; i < firstCandidate.size(); i++) {
+                Node temp = findLast(0,firstCandidate.get(i), currentLine);
+                if(temp.depth > last.depth){
+                    last = temp;
+                }
+            }
         }
-        int index = found.index;
-//        System.out.println("currentLast = " + currentLast.info);
-        if(index == 0){
-            index = 1;
+        if(last.depth > 0){
+            last = last.parent;
         }
-        for (int i = index; i < currentLine.length; i++) {
+        for (int i = last.depth+1; i < currentLine.length; i++) {
             Node nextNode = new Node();
             nextNode.info = currentLine[i];
             nextNode.child = new ArrayList<>();
-            nextNode.parent = currentLast;
-            currentLast.child.add(nextNode);
-            currentLast = nextNode;
+            nextNode.depth = i;
+            nextNode.parent = last;
+            last.child.add(nextNode);
+            last = nextNode;
+            if(!nodeMap.containsKey(nextNode.info)){
+                nodeMap.put(nextNode.info, new ArrayList<>());
+            }
+            nodeMap.get(nextNode.info).add(nextNode);
         }
     }
-    static Node findHead(Node current, String info){
-        if(!current.child.isEmpty() && current.info.equals(info)){
-            return current;
-        }
-        Node found = null;
-        for (int i = 0; i < current.child.size(); i++) {
-            Node find = findHead(current.child.get(i), info);
-            if(find != null){
-                found = find;
+    static List<Node> findFirst(String string){
+        List<Node> nodes = new ArrayList<>();
+        for (int i = 0; i < entrance.child.size(); i++) {
+            if(entrance.child.get(i).info.equals(string)){
+                nodes.add(entrance.child.get(i));
             }
         }
-        return found;
+        return nodes;
     }
-    static Found findLast(int index, Node currentNode, String[] arr){
-        Found found = new Found(currentNode, index);
-        if(index<arr.length && currentNode.info.equals(arr[index])){
-            for (int i = 0; i < currentNode.child.size(); i++) {
-               Found temp = findLast(index+1, currentNode.child.get(i), arr);
-               if(temp.index > found.index){
-                   found = temp;
-               }
+    static Node findLast(int index, Node current, String[] currentLine){
+        Node result = current;
+        if(current.info.equals(currentLine[index])){
+            for (int i = 0; i < current.child.size(); i++) {
+                Node temp = findLast(index+1, current.child.get(i), currentLine);
+                if(temp.depth > result.depth){
+                    result = temp;
+                }
             }
         }
-        return found;
+        return result;
     }
-    static void mapDepth(int depth, Node currentNode){
-        makeString(depth, currentNode);
+    static boolean search(Node node, String[] currentLine, int index){
+        if(index < 0){
+            return true;
+        }
+        else if(node.info.equals(currentLine[index]) && node.parent != null){
+            return search(node.parent, currentLine, index-1);
+        }
+        else {
+            return false;
+        }
+    }
+    static void mapDepth(Node currentNode){
+        makeString(currentNode);
         Collections.sort(currentNode.child);
         for (int i = 0; i < currentNode.child.size(); i++) {
-            mapDepth(depth+1, currentNode.child.get(i));
+            mapDepth(currentNode.child.get(i));
         }
     }
-    static void makeString(int depth, Node node){
-        for (int i = 0; i < depth*2; i++) {
+    static void makeString(Node node){
+        for (int i = 0; i < node.depth*2; i++) {
             sb.append("-");
         }
         sb.append(node.info).append("\n");
-    }
-    static class Found {
-        Node node;
-        int index;
-        public Found(){}
-        public Found(Node node, int index) {
-            this.node = node;
-            this.index = index;
-        }
     }
     static class Node implements Comparable<Node>{
         Node parent;
         List<Node> child;
         String info;
+        int depth;
 
         @Override
         public int compareTo(Node node){
             return this.info.compareTo(node.info);
+        }
+
+        @Override
+        public String toString() {
+            return "Node{" + "info='" + info + '\'' +
+                    ", depth=" + depth +
+                    '}';
         }
     }
 }
