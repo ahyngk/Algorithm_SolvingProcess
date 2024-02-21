@@ -29,7 +29,7 @@ public class BJ14725 {
         }
     }
     static void makeNodeList(String[] currentLine){
-        System.out.println("currentLine = " + Arrays.toString(currentLine));
+//        System.out.println("currentLine = " + Arrays.toString(currentLine));
         Node currentFirst = findHead(entrance, currentLine[0]);
         if(currentFirst == null){
             currentFirst = new Node();
@@ -38,14 +38,14 @@ public class BJ14725 {
             currentFirst.parent = entrance;
             entrance.child.add(currentFirst);
         }
-        System.out.println("currentFirst = " + currentFirst.info);
+//        System.out.println("currentFirst = " + currentFirst.info);
         Found found = findLast(0, currentFirst, currentLine);
         Node currentLast = found.node;
-        if(found.node.parent != null){
+        if(!found.node.parent.equals(entrance)){
             currentLast = found.node.parent;
         }
         int index = found.index;
-        System.out.println("currentLast = " + currentLast.info);
+//        System.out.println("currentLast = " + currentLast.info);
         if(index == 0){
             index = 1;
         }
@@ -73,7 +73,7 @@ public class BJ14725 {
     }
     static Found findLast(int index, Node currentNode, String[] arr){
         Found found = new Found(currentNode, index);
-        if(currentNode.info.equals(arr[index])){
+        if(index<arr.length && currentNode.info.equals(arr[index])){
             for (int i = 0; i < currentNode.child.size(); i++) {
                Found temp = findLast(index+1, currentNode.child.get(i), arr);
                if(temp.index > found.index){
